@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carte Interactive</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        #map {
+            height: 600px;
+            width: 100%;
+            margin: 20px auto;
+            border: 2px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-ajax/2.1.0/leaflet.ajax.min.js"></script>
+    <script>
+        // Initialiser la carte et la centrer sur le monde
+        var map = L.map('map').setView([20, 0], 2);
+
+        // Ajouter une couche de carte (OpenStreetMap)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Liste des pays et leurs informations
+        var countries = {
+            "Canada": { "culture": "Multiculturelle avec une forte influence européenne et indigène.", "food": "Poutine, sirop d'érable, tourtière.", "clothing": "Tenue occidentale moderne, influence autochtone dans certaines régions.", "religion": "Christianisme, Islam, Judaïsme, Hindouisme." },
+            "France": { "culture": "Influence majeure dans les arts, la philosophie et la mode.", "food": "Baguette, croissant, fromages, vin.", "clothing": "Mode parisienne chic, haute couture.", "religion": "Catholicisme principalement." },
+            "Japon": { "culture": "Riche en traditions avec des éléments modernes et historiques.", "food": "Sushi, ramen, tempura.", "clothing": "Kimono, tenue occidentale.", "religion": "Shintoïsme, Bouddhisme." },
+            "Brésil": { "culture": "Influences portugaises, africaines et indigènes.", "food": "Feijoada, churrasco.", "clothing": "Mode estivale décontractée.", "religion": "Christianisme, en majorité catholique." },
+            "Inde": { "culture": "Diversifiée avec de nombreuses langues et coutumes.", "food": "Curry, chapati, biryani.", "clothing": "Sari, kurta, tenues occidentales.", "religion": "Hindouisme, Islam, Christianisme, Sikhisme." },
+            "Chine": { "culture": "Civilisation ancienne avec une riche histoire philosophique.", "food": "Dumplings, riz, nouilles.", "clothing": "Qipao, tenues modernes.", "religion": "Bouddhisme, Taoïsme, Confucianisme." },
+            "Mexique": { "culture": "Influences espagnoles et indigènes.", "food": "Tacos, enchiladas, guacamole.", "clothing": "Tenues traditionnelles comme le poncho.", "religion": "Christianisme, en majorité catholique." },
+            "Allemagne": { "culture": "Influence dans la philosophie, la musique et la science.", "food": "Saucisses, bretzels, choucroute.", "clothing": "Dirndl, lederhosen, tenues modernes.", "religion": "Christianisme, principalement protestant." },
+            "Russie": { "culture": "Influence byzantine et européenne.", "food": "Borscht, pelmeni.", "clothing": "Tenues chaudes pour l'hiver, tenues modernes.", "religion": "Christianisme orthodoxe." },
+            "États-Unis": { "culture": "Diversité culturelle avec des influences mondiales.", "food": "Hamburgers, hot-dogs, barbecue.", "clothing": "Mode décontractée et influencée par les tendances.", "religion": "Christianisme, Islam, Judaïsme." },
+            "Italie": { "culture": "Influence majeure dans l'art, la cuisine et l'architecture.", "food": "Pizza, pâtes, risotto.", "clothing": "Mode élégante, haute couture.", "religion": "Catholicisme principalement." },
+            "Égypte": { "culture": "Civilisation ancienne influencée par l'Islam et le christianisme copte.", "food": "Ful medames, kushari.", "clothing": "Djellaba, hijab, tenues occidentales.", "religion": "Islam, minorités chrétiennes." },
+            "Nigéria": { "culture": "Mélange de cultures tribales et influences coloniales.", "food": "Jollof rice, fufu.", "clothing": "Tenues traditionnelles comme le boubou.", "religion": "Islam, Christianisme." },
+            "Afrique du Sud": { "culture": "Multiculturelle avec des influences européennes et africaines.", "food": "Biltong, braai.", "clothing": "Tenues modernes, tenues traditionnelles africaines.", "religion": "Christianisme, diverses croyances indigènes." },
+            "Corée du Sud": { "culture": "Héritage confucéen, influence moderne K-pop.", "food": "Kimchi, bibimbap.", "clothing": "Hanbok, tenues occidentales.", "religion": "Christianisme, Bouddhisme." },
+            "Argentine": { "culture": "Fortement influencée par l'Espagne et l'Italie.", "food": "Asado, empanadas.", "clothing": "Mode moderne avec une touche traditionnelle.", "religion": "Christianisme, principalement catholique." },
+            "Australie": { "culture": "Multiculturelle avec des racines européennes et indigènes.", "food": "Vegemite, barbecue.", "clothing": "Tenues décontractées, influence occidentale.", "religion": "Christianisme, Islam." },
+            "Espagne": { "culture": "Riche en arts, musique, danse flamenco.", "food": "Paella, tapas.", "clothing": "Mode élégante, influence flamenco.", "religion": "Catholicisme principalement." },
+            "Royaume-Uni": { "culture": "Influence mondiale dans la littérature, la politique et la musique.", "food": "Fish and chips, roast beef.", "clothing": "Mode classique, influence des tendances.", "religion": "Christianisme principalement." },
+            "Grèce": { "culture": "Civilisation ancienne influente en philosophie et arts.", "food": "Moussaka, souvlaki.", "clothing": "Tenues modernes, influence historique dans les festivals.", "religion": "Christianisme orthodoxe." },
+            "Thaïlande": { "culture": "Riche en traditions bouddhistes.", "food": "Pad Thai, curry vert.", "clothing": "Tenue traditionnelle thaïlandaise, tenues modernes.", "religion": "Bouddhisme principalement." },
+            "Turquie": { "culture": "Mélange d'influences européennes et asiatiques.", "food": "Kebabs, baklava.", "clothing": "Tenues modernes, hijab dans certaines régions.", "religion": "Islam principalement." },
+            "Pérou": { "culture": "Influence inca et espagnole.", "food": "Ceviche, lomo saltado.", "clothing": "Poncho traditionnel, tenues modernes.", "religion": "Christianisme principalement." },
+            "Indonésie": { "culture": "Diversité ethnique avec plus de 300 groupes ethniques.", "food": "Nasi goreng, satay.", "clothing": "Tenue batik, sarong.", "religion": "Islam, Christianisme, Hindouisme, Bouddhisme." },
+            "Arabie Saoudite": { "culture": "Influencée par l'Islam et les traditions arabes.", "food": "Kabsa, dates.", "clothing": "Thawb, abaya.", "religion": "Islam principalement." },
+            "Venezuela": { "culture": "Influence espagnole et indigène.", "food": "Arepas, pabellón criollo.", "clothing": "Tenues modernes, influence traditionnelle lors des festivals.", "religion": "Christianisme principalement." },
+            "Vietnam": { "culture": "Fortement influencée par le confucianisme.", "food": "Pho, spring rolls.", "clothing": "Ao Dai, tenues modernes.", "religion": "Bouddhisme, Christianisme." },
+            "Kenya": { "culture": "Diversité ethnique avec des traditions tribales.", "food": "Ugali, nyama choma.", "clothing": "Tenues traditionnelles africaines.", "religion": "Christianisme, Islam." },
+            "Maroc": { "culture": "Mélange d'influences arabes, berbères et européennes.", "food": "Couscous, tajine.", "clothing": "Djellaba, caftan.", "religion": "Islam principalement." },
+            "Algérie": { "culture": "Influences arabes, berbères et françaises.", "food": "Couscous, chorba.", "clothing": "Djellaba, tenues traditionnelles berbères.", "religion": "Islam principalement." },
+            "Tunisie": { "culture": "Influences arabes, berbères et méditerranéennes.", "food": "Couscous, brik.", "clothing": "Djellaba, tenues traditionnelles.", "religion": "Islam principalement." },
+            "Libye": { "culture": "Influences arabes et berbères.", "food": "Couscous, soupe libyenne.", "clothing": "Tenues traditionnelles libyennes.", "religion": "Islam principalement." },
+            "Palestine": { "culture": "Influences arabes et historiques.", "food": "Musakhan, falafel.", "clothing": "Thobe, keffieh.", "religion": "Islam principalement, avec des minorités chrétiennes." }
+        };
+
+        // Fonction pour ajouter un marqueur sur la carte
+        function addMarker(country, info) {
+            L.marker([info.lat, info.lng]).addTo(map)
+                .bindPopup('<strong>' + country + '</strong><br>' +
+                           'Culture: ' + info.culture + '<br>' +
+                           'Food: ' + info.food + '<br>' +
+                           'Clothing: ' + info.clothing + '<br>' +
+                           'Religion: ' + info.religion);
+        }
+
+        // Ajouter des marqueurs pour chaque pays
+        var locations = {
+            "Canada": { "lat": 56.1304, "lng": -106.3468 },
+            "France": { "lat": 46.6034, "lng": 1.8883 },
+            "Japon": { "lat": 36.2048, "lng": 138.2529 },
+            "Brésil": { "lat": -14.2350, "lng": -51.9253 },
+            "Inde": { "lat": 20.5937, "lng": 78.9629 },
+            "Chine": { "lat": 35.8617, "lng": 104.1954 },
+            "Mexique": { "lat": 23.6345, "lng": -102.5528 },
+            "Allemagne": { "lat": 51.1657, "lng": 10.4515 },
+            "Russie": { "lat": 61.5240, "lng": 105.3188 },
+            "États-Unis": { "lat": 37.0902, "lng": -95.7129 },
+            "Italie": { "lat": 41.8719, "lng": 12.5674 },
+            "Égypte": { "lat": 26.8206, "lng": 30.8025 },
+            "Nigéria": { "lat": 9.0820, "lng": 8.6753 },
+            "Afrique du Sud": { "lat": -30.5595, "lng": 22.9375 },
+            "Corée du Sud": { "lat": 35.9078, "lng": 127.7669 },
+            "Argentine": { "lat": -38.4161, "lng": -63.6167 },
+            "Australie": { "lat": -25.2744, "lng": 133.7751 },
+            "Espagne": { "lat": 40.4637, "lng": -3.7038 },
+            "Royaume-Uni": { "lat": 55.3781, "lng": -3.4360 },
+            "Grèce": { "lat": 39.0742, "lng": 21.8243 },
+            "Thaïlande": { "lat": 15.8700, "lng": 100.9925 },
+            "Turquie": { "lat": 38.9637, "lng": 35.2433 },
+            "Pérou": { "lat": -9.1900, "lng": -75.0152 },
+            "Indonésie": { "lat": -0.7893, "lng": 113.9213 },
+            "Arabie Saoudite": { "lat": 23.8859, "lng": 45.0792 },
+            "Venezuela": { "lat": 6.4238, "lng": -66.5897 },
+            "Vietnam": { "lat": 14.0583, "lng": 108.2772 },
+            "Kenya": { "lat": -0.0236, "lng": 37.9062 },
+            "Maroc": { "lat": 31.7917, "lng": -7.0926 },
+            "Algérie": { "lat": 28.0339, "lng": 1.6596 },
+            "Tunisie": { "lat": 33.8869, "lng": 9.5375 },
+            "Libye": { "lat": 26.3351, "lng": 17.2283 },
+            "Palestine": { "lat": 31.9474, "lng": 35.3026 }
+        };
+
+        for (var country in locations) {
+            if (countries[country]) {
+                addMarker(country, Object.assign(locations[country], countries[country]));
+            }
+        }
+    </script>
+</body>
+</html>
